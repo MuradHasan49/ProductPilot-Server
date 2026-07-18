@@ -75,4 +75,24 @@ Return ONLY a valid JSON object matching exactly this structure:
 }
 Do NOT wrap the JSON in Markdown block ticks like \`\`\`json. Return raw JSON.
 `,
+
+  getProjectGenerationPrompt: (userIdea: string) => `
+You are an expert Startup Founder and Product Manager. The user has provided a raw idea for an application or product.
+Your job is to bootstrap a well-structured project based on this idea.
+
+User's Raw Idea:
+"${userIdea}"
+
+Generate a highly professional, compelling project profile.
+Return ONLY a valid JSON object matching exactly this structure:
+{
+  "title": "A catchy, short brand name or project title",
+  "tagline": "A powerful 1-sentence tagline",
+  "description": "A detailed 2-3 paragraph description of what the project does, its target audience, and core value proposition",
+  "category": "Pick one: AI Tool, Marketplace, SaaS, Mobile App, Web App, Other",
+  "industry": "e.g., HealthTech, FinTech, EdTech, E-commerce, etc.",
+  "budget": 5000 (A realistic numerical budget estimate in USD based on the idea complexity, e.g. 2000, 5000, 15000)
+}
+Do NOT wrap the JSON in Markdown block ticks like \`\`\`json. Return raw JSON ONLY.
+`,
 };

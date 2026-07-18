@@ -1,5 +1,5 @@
 import express from 'express';
-import { generatePRD, generateUserStories, chat, classifyProject, bulkClassifyProjects, siteChat } from '../controllers/ai.controller';
+import { generatePRD, generateUserStories, chat, classifyProject, bulkClassifyProjects, siteChat, generateProject } from '../controllers/ai.controller';
 import { protect } from '../middleware/authMiddleware';
 
 const router = express.Router();
@@ -14,5 +14,6 @@ router.post('/user-stories', generateUserStories);
 router.post('/chat', chat);
 router.post('/classify', classifyProject);
 router.post('/bulk-classify', bulkClassifyProjects);
+router.post('/generate-project', generateProject);
 
 export default router;

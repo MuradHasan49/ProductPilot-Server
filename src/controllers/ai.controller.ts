@@ -268,3 +268,41 @@ export const siteChat = async (req: Request, res: Response, next: NextFunction) 
     res.status(500).json({ success: false, message: error.message || 'Internal Server Error' });
   }
 };
+
+export const generateProject = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { idea } = req.body;
+    if (!idea) {
+      return res.status(400).json({ success: false, message: 'Idea is required' });
+    }
+
+    const prompt = PromptManager.getProjectGenerationPrompt(idea);
+    const responseText = await generateText(prompt);
+    
+    let projectData;
+    try {
+      const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+      projectData = JSON.parse(cleanJson);
+    } catch (e) {
+      console.error("Failed to parse project generation JSON:", responseText);
+      return res.status(500).json({ success: false, message: 'AI failed to generate valid structured JSON for the project.' });
+    }
+
+    // Create the project in the database
+    const newProject = await Project.create({
+      ownerId: req.user!.id,
+      title: projectData.title,
+      tagline: projectData.tagline,
+      description: projectData.description,
+      category: projectData.category,
+      industry: projectData.industry,
+      budget: projectData.budget,
+      visibility: 'private' // Default to private
+    });
+
+    res.status(201).json({ success: true, data: newProject });
+  } catch (error: any) {
+    console.error(`[AI Controller - Generate Project] ERROR:`, error.message);
+    res.status(500).json({ success: false, message: error.message || 'Internal Server Error' });
+  }
+};
