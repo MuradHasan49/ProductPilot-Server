@@ -9,6 +9,7 @@ export const initializeAuth = async (db: any) => {
   const { mongodbAdapter } = await dynamicImport('better-auth/adapters/mongodb');
 
   auth = betterAuth({
+    baseURL: process.env.BETTER_AUTH_URL || "http://localhost:8000",
     database: mongodbAdapter(db),
     emailAndPassword: {
       enabled: true,
@@ -20,6 +21,13 @@ export const initializeAuth = async (db: any) => {
       },
     },
     trustedOrigins: [process.env.CLIENT_URL || "http://localhost:3000"],
+    advanced: {
+      useSecureCookies: true, // required for SameSite=None
+      defaultCookieAttributes: {
+        sameSite: "none",
+        secure: true,
+      }
+    }
   });
   return auth;
 };
