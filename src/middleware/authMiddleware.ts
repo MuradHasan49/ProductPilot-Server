@@ -21,10 +21,14 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
       return res.status(500).json({ success: false, message: 'Auth not initialized' });
     }
 
-    const { fromNodeHeaders } = await dynamicImport('better-auth/node');
-    const session = await auth.api.getSession({
-      headers: fromNodeHeaders(req.headers)
-    });
+    const headers = new Headers();
+    for (const key in req.headers) {
+      if (req.headers[key]) {
+        headers.set(key, req.headers[key] as string);
+      }
+    }
+
+    const session = await auth.api.getSession({ headers });
 
     if (!session || !session.user) {
       return res.status(401).json({ success: false, message: 'Not authorized, no token' });

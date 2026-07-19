@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import mongoose from 'mongoose';
 import { Project } from '../models/Project';
 import { ProjectFeature } from '../models/ProjectFeature';
 import { UserStory } from '../models/UserStory';
@@ -17,7 +18,11 @@ export const getProjects = async (req: Request, res: Response, next: NextFunctio
     let queryStr = JSON.stringify(queryObj);
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
     
-    let dbQuery = Project.find({ ownerId: req.user?.id, ...JSON.parse(queryStr) });
+    // Convert string ID to ObjectId for Mongoose querying safely
+    const userId = req.user?.id;
+    const userObjId = userId && mongoose.Types.ObjectId.isValid(userId) ? new mongoose.Types.ObjectId(userId) : userId;
+    
+    let dbQuery = Project.find({ ownerId: userObjId, ...JSON.parse(queryStr) });
 
     // 2. Search
     if (req.query.search) {
@@ -50,7 +55,7 @@ export const getProjects = async (req: Request, res: Response, next: NextFunctio
     const projects = await dbQuery;
     
     // Count total documents for pagination info
-    const total = await Project.countDocuments({ ownerId: req.user?.id, ...JSON.parse(queryStr) });
+    const total = await Project.countDocuments({ ownerId: userObjId, ...JSON.parse(queryStr) });
 
     res.status(200).json({ 
       success: true, 
@@ -69,7 +74,10 @@ export const getProjects = async (req: Request, res: Response, next: NextFunctio
 
 export const getProjectById = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const project = await Project.findOne({ _id: req.params.id, ownerId: req.user?.id });
+    const userId = req.user?.id;
+    const userObjId = userId && mongoose.Types.ObjectId.isValid(userId) ? new mongoose.Types.ObjectId(userId) : userId;
+
+    const project = await Project.findOne({ _id: req.params.id, ownerId: userObjId });
     if (!project) {
       return res.status(404).json({ success: false, message: 'Project not found' });
     }
@@ -83,8 +91,11 @@ export const createProject = async (req: Request, res: Response, next: NextFunct
   try {
     const { title, category, description, tagline, industry, businessGoal, targetAudience, budget, timeline, visibility } = req.body;
 
+    const userId = req.user?.id;
+    const userObjId = userId && mongoose.Types.ObjectId.isValid(userId) ? new mongoose.Types.ObjectId(userId) : userId;
+
     const project = await Project.create({
-      ownerId: req.user?.id,
+      ownerId: userObjId,
       title,
       category,
       description,
