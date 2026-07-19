@@ -1,12 +1,13 @@
-import { betterAuth } from "better-auth";
-import { mongodbAdapter } from "better-auth/adapters/mongodb";
-import mongoose from "mongoose";
-
 export let auth: any = null;
+
+const dynamicImport = new Function('specifier', 'return import(specifier)');
 
 // We use a function to initialize auth so we can pass the MongoDB db instance
 // after Mongoose has successfully connected.
-export const initializeAuth = (db: any) => {
+export const initializeAuth = async (db: any) => {
+  const { betterAuth } = await dynamicImport('better-auth');
+  const { mongodbAdapter } = await dynamicImport('better-auth/adapters/mongodb');
+
   auth = betterAuth({
     database: mongodbAdapter(db),
     emailAndPassword: {

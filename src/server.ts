@@ -5,7 +5,6 @@ import cookieParser from 'cookie-parser';
 import mongoose from 'mongoose';
 import { connectDB } from './config/db';
 import { errorHandler } from './middleware/errorHandler';
-import { toNodeHandler } from 'better-auth/node';
 import { initializeAuth } from './auth';
 
 import projectRoutes from './routes/project.routes';
@@ -32,17 +31,25 @@ app.use(async (req, res, next) => {
         await connectDB();
     }
     if (!auth && mongoose.connection.db) {
-        auth = initializeAuth(mongoose.connection.db);
+        auth = await initializeAuth(mongoose.connection.db);
     }
     next();
 });
 
+const dynamicImport = new Function('specifier', 'return import(specifier)');
+
 // Mount Better Auth handler safely bypassing Express 5 path-to-regexp limitations
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
     if (req.url.startsWith('/api/auth') && auth) {
-        return toNodeHandler(auth)(req, res);
+        try {
+            const module = await dynamicImport('better-auth/node');
+            return module.toNodeHandler(auth)(req, res);
+        } catch (err) {
+            next(err);
+        }
+    } else {
+        next();
     }
-    next();
 });
 
 // Routes
@@ -70,7 +77,7 @@ if (process.env.NODE_ENV !== 'production') {
         if (mongoose.connection.readyState !== 1) {
             await connectDB();
             if (!auth && mongoose.connection.db) {
-                auth = initializeAuth(mongoose.connection.db);
+                auth = await initializeAuth(mongoose.connection.db);
             }
         }
         console.log(`🚀 Server initialized and running on port ${PORT}`);
