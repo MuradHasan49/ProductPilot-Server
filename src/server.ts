@@ -13,6 +13,14 @@ import analyticsRoutes from './routes/analytics.routes';
 import dashboardRoutes from './routes/dashboard.routes';
 import userRoutes from './routes/auth.routes';
 
+// Dummy block to force Vercel's NFT (Node File Trace) to bundle better-auth
+// Since we use dynamic eval imports, Vercel strips the package thinking it's unused.
+if (process.env.VERCEL_FORCE_BUNDLE === 'true') {
+    require('better-auth');
+    require('better-auth/node');
+    require('better-auth/adapters/mongodb');
+}
+
 const app = express();
 
 app.use(cors({
