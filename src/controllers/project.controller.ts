@@ -333,3 +333,54 @@ export const deleteDocument = async (req: Request, res: Response, next: NextFunc
     next(error);
   }
 };
+
+export const cloneProject = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // 1. Fetch source project (must be public)
+    const sourceProject = await Project.findOne({ _id: req.params.id, visibility: 'public' });
+    if (!sourceProject) {
+      return res.status(404).json({ success: false, message: 'Public project not found or not accessible.' });
+    }
+
+    // 2. Clone the project
+    const newProject = await Project.create({
+      ownerId: req.user?.id,
+      title: `Copy of ${sourceProject.title}`,
+      category: sourceProject.category,
+      description: sourceProject.description,
+      tagline: sourceProject.tagline,
+      industry: sourceProject.industry,
+      businessGoal: sourceProject.businessGoal,
+      targetAudience: sourceProject.targetAudience,
+      budget: sourceProject.budget,
+      timeline: sourceProject.timeline,
+      tags: sourceProject.tags,
+      visibility: 'private', // User's cloned copy is private by default
+      coverImage: sourceProject.coverImage
+    });
+
+    // 3. Clone associated documents
+    const sourceDocs = await ProjectDocument.find({ projectId: sourceProject._id });
+    if (sourceDocs.length > 0) {
+      const newDocs = sourceDocs.map(doc => ({
+        projectId: newProject._id,
+        title: doc.title,
+        type: doc.type,
+        content: doc.content
+      }));
+      await ProjectDocument.insertMany(newDocs);
+    }
+
+    // 4. Log the activity
+    await ActivityLog.create({
+      userId: req.user?.id,
+      projectId: newProject._id,
+      action: 'PROJECT_CREATED',
+      details: `Cloned from public project: ${sourceProject.title}`
+    });
+
+    res.status(201).json({ success: true, data: newProject });
+  } catch (error) {
+    next(error);
+  }
+};
