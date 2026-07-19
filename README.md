@@ -2,7 +2,7 @@
 
 > **Turn ideas into polished product roadmaps, user stories, and AI-generated docs—all in one place.**
 
-[![Live Site (Vercel)](https://img.shields.io/badge/Live%20Site-product--pilot--mu.vercel.app-6C47FF?style=for-the-badge)](https://product-pilot-mu.vercel.app/)
+[![Live Site](https://img.shields.io/badge/Live_Site-Vercel-000000?style=for-the-badge&logo=vercel)](https://product-pilot-mu.vercel.app/)
 [![Client Repo](https://img.shields.io/badge/GitHub-Client-161827?style=for-the-badge&logo=github)](https://github.com/MuradHasan49/ProductPilot)
 [![Server Repo](https://img.shields.io/badge/GitHub-Server-161827?style=for-the-badge&logo=github)](https://github.com/MuradHasan49/ProductPilot-Server)
 
