@@ -5,6 +5,7 @@ import { UserStory } from '../models/UserStory';
 import { SprintPlan } from '../models/SprintPlan';
 import { Roadmap } from '../models/Roadmap';
 import { ProjectDocument } from '../models/ProjectDocument';
+import { ActivityLog } from '../models/ActivityLog';
 
 export const getProjects = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -96,6 +97,12 @@ export const createProject = async (req: Request, res: Response, next: NextFunct
       visibility
     });
 
+    await ActivityLog.create({
+      userId: req.user?.id,
+      projectId: project._id,
+      action: `Created new project: ${project.title}`
+    });
+
     res.status(201).json({ success: true, data: project });
   } catch (error) {
     next(error);
@@ -112,6 +119,12 @@ export const updateProject = async (req: Request, res: Response, next: NextFunct
     project = await Project.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
+    });
+
+    await ActivityLog.create({
+      userId: req.user?.id,
+      projectId: project?._id,
+      action: `Updated project: ${project?.title}`
     });
 
     res.status(200).json({ success: true, data: project });
@@ -134,6 +147,12 @@ export const deleteProject = async (req: Request, res: Response, next: NextFunct
     await UserStory.deleteMany({ projectId: req.params.id });
     await SprintPlan.deleteMany({ projectId: req.params.id });
     await Roadmap.deleteMany({ projectId: req.params.id });
+
+    await ActivityLog.create({
+      userId: req.user?.id,
+      projectId: req.params.id,
+      action: `Deleted project: ${project.title}`
+    });
 
     res.status(200).json({ success: true, data: {} });
   } catch (error) {
@@ -264,6 +283,52 @@ export const getDocuments = async (req: Request, res: Response, next: NextFuncti
 
     const docs = await ProjectDocument.find({ projectId: project._id }).sort('-createdAt');
     res.status(200).json({ success: true, data: docs });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateDocument = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { title, type, content } = req.body;
+    
+    // Check project ownership
+    const project = await Project.findOne({ _id: req.params.id, ownerId: req.user?.id });
+    if (!project) {
+      return res.status(404).json({ success: false, message: 'Project not found' });
+    }
+
+    const doc = await ProjectDocument.findOneAndUpdate(
+      { _id: req.params.docId, projectId: project._id },
+      { title, type, content },
+      { new: true, runValidators: true }
+    );
+
+    if (!doc) {
+      return res.status(404).json({ success: false, message: 'Document not found' });
+    }
+
+    res.status(200).json({ success: true, data: doc });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteDocument = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // Check project ownership
+    const project = await Project.findOne({ _id: req.params.id, ownerId: req.user?.id });
+    if (!project) {
+      return res.status(404).json({ success: false, message: 'Project not found' });
+    }
+
+    const doc = await ProjectDocument.findOneAndDelete({ _id: req.params.docId, projectId: project._id });
+
+    if (!doc) {
+      return res.status(404).json({ success: false, message: 'Document not found' });
+    }
+
+    res.status(200).json({ success: true, data: {} });
   } catch (error) {
     next(error);
   }

@@ -5,6 +5,7 @@ import { loadProjectContext, loadFeaturesContext, loadChatHistory } from '../ai/
 import { AIGeneration } from '../models/AIGeneration';
 import { AIConversation } from '../models/AIConversation';
 import { Project } from '../models/Project';
+import { ActivityLog } from '../models/ActivityLog';
 
 export const generatePRD = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -31,6 +32,12 @@ export const generatePRD = async (req: Request, res: Response, next: NextFunctio
       agent: 'PRD Generator',
       prompt,
       response: responseText,
+    });
+
+    await ActivityLog.create({
+      userId: req.user!.id,
+      projectId,
+      action: 'Generated PRD Document'
     });
 
     res.status(200).json({ success: true, data: responseText });
@@ -65,6 +72,12 @@ export const generateUserStories = async (req: Request, res: Response, next: Nex
       agent: 'User Story Generator',
       prompt,
       response: responseText,
+    });
+
+    await ActivityLog.create({
+      userId: req.user!.id,
+      projectId,
+      action: 'Generated User Stories'
     });
 
     res.status(200).json({ success: true, data: responseText });
@@ -281,11 +294,17 @@ export const generateProject = async (req: Request, res: Response, next: NextFun
     
     let projectData;
     try {
-      const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
-      projectData = JSON.parse(cleanJson);
+      const match = responseText.match(/\{[\s\S]*\}/);
+      if (match) {
+        projectData = JSON.parse(match[0]);
+      } else {
+        // Fallback to original method just in case
+        const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+        projectData = JSON.parse(cleanJson);
+      }
     } catch (e) {
       console.error("Failed to parse project generation JSON:", responseText);
-      return res.status(500).json({ success: false, message: 'AI failed to generate valid structured JSON for the project.' });
+      return res.status(500).json({ success: false, message: 'We had a little trouble understanding that idea. Could you please add a bit more detail and try again?' });
     }
 
     // Create the project in the database
@@ -297,7 +316,13 @@ export const generateProject = async (req: Request, res: Response, next: NextFun
       category: projectData.category,
       industry: projectData.industry,
       budget: projectData.budget,
-      visibility: 'private' // Default to private
+      visibility: 'public' // Default to public
+    });
+
+    await ActivityLog.create({
+      userId: req.user!.id,
+      projectId: newProject._id,
+      action: `AI Generated Project: ${newProject.title}`
     });
 
     res.status(201).json({ success: true, data: newProject });

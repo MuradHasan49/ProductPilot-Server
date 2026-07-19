@@ -84,15 +84,15 @@ User's Raw Idea:
 "${userIdea}"
 
 Generate a highly professional, compelling project profile.
-Return ONLY a valid JSON object matching exactly this structure:
+Return ONLY a valid JSON object matching exactly this structure (do NOT include any comments or additional text):
 {
   "title": "A catchy, short brand name or project title",
   "tagline": "A powerful 1-sentence tagline",
   "description": "A detailed 2-3 paragraph description of what the project does, its target audience, and core value proposition",
-  "category": "Pick one: AI Tool, Marketplace, SaaS, Mobile App, Web App, Other",
-  "industry": "e.g., HealthTech, FinTech, EdTech, E-commerce, etc.",
-  "budget": 5000 (A realistic numerical budget estimate in USD based on the idea complexity, e.g. 2000, 5000, 15000)
+  "category": "Mobile App",
+  "industry": "HealthTech",
+  "budget": 5000
 }
-Do NOT wrap the JSON in Markdown block ticks like \`\`\`json. Return raw JSON ONLY.
+Ensure that 'budget' is a number, not a string. Do NOT wrap the JSON in Markdown block ticks like \`\`\`json. Return raw JSON ONLY.
 `,
 };
