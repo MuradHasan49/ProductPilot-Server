@@ -10,22 +10,22 @@
 
 ## 🌐 Live Site
 
-**URL:** `https://product-pilot-mu.vercel.app/`
+**URL:** [https://product-pilot-mu.vercel.app/](https://product-pilot-mu.vercel.app/)
 
 ---
 
 ## 📂 Repositories
 
-- **Client Repository:** `https://github.com/MuradHasan49/ProductPilot`
-- **Server Repository:** `https://github.com/MuradHasan49/ProductPilot-Server`
+- **Client Repository:** [https://github.com/MuradHasan49/ProductPilot](https://github.com/MuradHasan49/ProductPilot)
+- **Server Repository:** [https://github.com/MuradHasan49/ProductPilot-Server](https://github.com/MuradHasan49/ProductPilot-Server)
 
 ---
 
 ## 🔑 Demo Credentials
 
 **Standard User (Builder):**
-- Email: `demo@productpilot.com`
-- Password: `Password123`
+- Email: `mhs@gmail.com`
+- Password: `Aa123456`
 
 *(Note: You can also instantly log in using the Google OAuth provider on the login page!)*
 
@@ -33,18 +33,41 @@
 
 ## 🚀 Key Features
 
-1. **AI-Powered Document Generation** — Leverages the blazing-fast Groq LLM API to instantly generate PRDs (Product Requirements Documents), User Stories, and Sprint Plans based on a simple project description.
-2. **Universal Authentication** — Secure Email/Password and Google OAuth powered by Better-Auth. JWT session tokens are securely stored in `SameSite=None` `httpOnly` cookies.
-3. **Server-Side Proxy Architecture** — Eliminates aggressive third-party cookie blocking for OAuth redirects by proxying frontend `/api/auth` requests directly to the backend through Next.js rewrites.
-4. **Project Management Workflow** — Full CRUD functionality to manage product ideas. Users can toggle project visibility (public vs private) and organize their workspaces efficiently.
-5. **Interactive AI Workspace** — Features a dedicated AI chat interface allowing users to brainstorm features, refine requirements, and chat with an AI "co-founder".
-6. **Comprehensive Document Hub** — Centralized management of all generated Project Documents, Features, Roadmaps, and Sprint Plans with capabilities to edit and delete.
-7. **Dashboard & Analytics** — A beautiful visual dashboard utilizing Recharts to display real-time statistics like active projects, generated AI docs, and a chronological timeline of recent activity logs.
-8. **Public Explore Page** — A robust discovery page featuring full-text search, category filters, visibility toggles, and pagination, allowing users to browse public projects created by the community.
-9. **Activity Logging System** — Automatically tracks and records critical user actions in the database to maintain an audit trail visible directly on the user's dashboard.
-10. **State Management & Caching** — Utilizes Zustand for lightweight global state (auth, UI) alongside TanStack Query v5 for efficient server-state caching, automatic refetching, and optimistic UI updates.
-11. **Responsive Glassmorphism UI** — Modern interface built with Tailwind CSS v4, featuring Framer Motion micro-animations, Swiper carousels, and a mobile-first responsive dashboard sidebar.
-12. **Full-Stack Type Safety** — End-to-end TypeScript integration with Zod schemas strictly validating all API payloads, request queries, and frontend form inputs.
+- 🤖 **AI-Powered Document Generation**  
+  Leverages the blazing-fast Groq LLM API to instantly generate PRDs (Product Requirements Documents), User Stories, and Sprint Plans based on a simple project description.
+
+- 🔐 **Universal Authentication**  
+  Secure Email/Password and Google OAuth powered by Better-Auth. JWT session tokens are securely stored in `SameSite=None` `httpOnly` cookies.
+
+- 🛡️ **Server-Side Proxy Architecture**  
+  Eliminates aggressive third-party cookie blocking for OAuth redirects by proxying frontend `/api/auth` requests directly to the backend through Next.js rewrites.
+
+- 📂 **Project Management Workflow**  
+  Full CRUD functionality to manage product ideas. Users can toggle project visibility (public vs private) and organize their workspaces efficiently.
+
+- 💬 **Interactive AI Workspace**  
+  Features a dedicated AI chat interface allowing users to brainstorm features, refine requirements, and chat with an AI "co-founder".
+
+- 📄 **Comprehensive Document Hub**  
+  Centralized management of all generated Project Documents, Features, Roadmaps, and Sprint Plans with capabilities to edit and delete.
+
+- 📊 **Dashboard & Analytics**  
+  A beautiful visual dashboard utilizing Recharts to display real-time statistics like active projects, generated AI docs, and a chronological timeline of recent activity logs.
+
+- 🔍 **Public Explore Page**  
+  A robust discovery page featuring full-text search, category filters, visibility toggles, and pagination, allowing users to browse public projects created by the community.
+
+- 📝 **Activity Logging System**  
+  Automatically tracks and records critical user actions in the database to maintain an audit trail visible directly on the user's dashboard.
+
+- ⚡ **State Management & Caching**  
+  Utilizes Zustand for lightweight global state (auth, UI) alongside TanStack Query v5 for efficient server-state caching, automatic refetching, and optimistic UI updates.
+
+- 🎨 **Responsive Glassmorphism UI**  
+  Modern interface built with Tailwind CSS v4, featuring Framer Motion micro-animations, Swiper carousels, and a mobile-first responsive dashboard sidebar.
+
+- ✅ **Full-Stack Type Safety**  
+  End-to-end TypeScript integration with Zod schemas strictly validating all API payloads, request queries, and frontend form inputs.
 
 ---
 
@@ -204,5 +227,5 @@ npm run dev    # starts on http://localhost:3000
 
 ## 📞 Contact & Links
 
-- **LinkedIn:** [linkedin.com/in/murad-hasan](https://linkedin.com/in/murad-hasan)
+- **LinkedIn:** [linkedin.com/in/muradhasan49](https://www.linkedin.com/in/muradhasan49/)
 - **Portfolio:** [muradhasan49.vercel.app](https://muradhasan49.vercel.app/)
