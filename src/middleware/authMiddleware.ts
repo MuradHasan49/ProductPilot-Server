@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import { fromNodeHeaders } from 'better-auth/node';
 import { auth } from '../auth';
+
+const dynamicImport = new Function('specifier', 'return import(specifier)');
 
 declare global {
   namespace Express {
@@ -20,6 +21,7 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
       return res.status(500).json({ success: false, message: 'Auth not initialized' });
     }
 
+    const { fromNodeHeaders } = await dynamicImport('better-auth/node');
     const session = await auth.api.getSession({
       headers: fromNodeHeaders(req.headers)
     });
