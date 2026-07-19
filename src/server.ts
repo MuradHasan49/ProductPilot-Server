@@ -12,6 +12,7 @@ import projectRoutes from './routes/project.routes';
 import aiRoutes from './routes/ai.routes';
 import analyticsRoutes from './routes/analytics.routes';
 import dashboardRoutes from './routes/dashboard.routes';
+import userRoutes from './routes/auth.routes';
 
 const app = express();
 
@@ -43,6 +44,7 @@ const startServer = async () => {
     app.use('/api/ai', aiRoutes);
     app.use('/api/analytics', analyticsRoutes);
     app.use('/api/dashboard', dashboardRoutes);
+    app.use('/api/users', userRoutes);
 
     app.get('/', (req, res) => {
         res.send('Welcome to ProductPilot AI API 🚀 ');
