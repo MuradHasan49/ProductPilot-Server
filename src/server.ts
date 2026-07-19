@@ -24,43 +24,57 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
-// Connect to MongoDB and start server
-const startServer = async () => {
-    await connectDB();
+let auth: any = null;
 
-    // Initialize Better Auth with the native mongodb instance
-    const auth = initializeAuth(mongoose.connection.db);
+// Middleware to ensure DB and Auth are initialized before handling requests on serverless
+app.use(async (req, res, next) => {
+    if (mongoose.connection.readyState !== 1) {
+        await connectDB();
+    }
+    if (!auth && mongoose.connection.db) {
+        auth = initializeAuth(mongoose.connection.db);
+    }
+    next();
+});
 
-    // Mount Better Auth handler safely bypassing Express 5 path-to-regexp limitations
-    app.use((req, res, next) => {
-        if (req.url.startsWith('/api/auth')) {
-            return toNodeHandler(auth)(req, res);
-        }
-        next();
-    });
+// Mount Better Auth handler safely bypassing Express 5 path-to-regexp limitations
+app.use((req, res, next) => {
+    if (req.url.startsWith('/api/auth') && auth) {
+        return toNodeHandler(auth)(req, res);
+    }
+    next();
+});
 
-    // Routes
-    app.use('/api/projects', projectRoutes);
-    app.use('/api/ai', aiRoutes);
-    app.use('/api/analytics', analyticsRoutes);
-    app.use('/api/dashboard', dashboardRoutes);
-    app.use('/api/users', userRoutes);
+// Routes
+app.use('/api/projects', projectRoutes);
+app.use('/api/ai', aiRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/users', userRoutes);
 
-    app.get('/', (req, res) => {
-        res.send('Welcome to ProductPilot AI API 🚀 ');
-    });
+app.get('/', (req, res) => {
+    res.send('Welcome to ProductPilot AI API 🚀 ');
+});
 
-    app.get('/api/health', (req, res) => {
-        res.status(200).json({ success: true, message: 'ProductPilot AI Server is running!' });
-    });
+app.get('/api/health', (req, res) => {
+    res.status(200).json({ success: true, message: 'ProductPilot AI Server is running!' });
+});
 
-    // Global Error Handler
-    app.use(errorHandler);
+// Global Error Handler
+app.use(errorHandler);
 
+// Only listen if not running in a serverless environment like Vercel
+if (process.env.NODE_ENV !== 'production') {
     const PORT = process.env.PORT || 8000;
-    app.listen(PORT, () => {
+    app.listen(PORT, async () => {
+        if (mongoose.connection.readyState !== 1) {
+            await connectDB();
+            if (!auth && mongoose.connection.db) {
+                auth = initializeAuth(mongoose.connection.db);
+            }
+        }
         console.log(`🚀 Server initialized and running on port ${PORT}`);
     });
-};
+}
 
-startServer();
+export default app;
