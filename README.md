@@ -21,17 +21,30 @@
 
 ---
 
+## 🔑 Demo Credentials
+
+**Standard User (Builder):**
+- Email: `demo@productpilot.com`
+- Password: `Password123`
+
+*(Note: You can also instantly log in using the Google OAuth provider on the login page!)*
+
+---
+
 ## 🚀 Key Features
 
-1. **Universal Auth** — Email/password and Google OAuth powered by Better-Auth (JWT stored in secure `SameSite=None` cookies).
-2. **Dashboard Overview** — Real-time stats (active projects, AI documents generated, recent activity) visualised with Recharts.
-3. **Project Management** — Create, edit, delete, clone, and bulk-classify projects. Toggle private and public visibility.
-4. **AI Workspace** — Generate AI-assisted documents (PRDs, user stories, feature specs) for each project.
-5. **Document Management** — Upload, list, edit, and delete project-related documents.
-6. **Server-Side Proxy** — `/api/auth` proxy runs on the same domain as the frontend, effectively bypassing strict third-party cookie blocking for OAuth redirects.
-7. **Robust CORS & Security** — Whitelisted origins via `CLIENT_URL` and secure cookies prevent cross-site attacks.
-8. **Responsive UI** — Tailwind-styled components, glass-morphism cards, smooth micro-animations, and mobile-first layout.
-9. **Type-Safe End-to-End** — Full TypeScript coverage on both client and server, with runtime validation via Zod.
+1. **AI-Powered Document Generation** — Leverages the blazing-fast Groq LLM API to instantly generate PRDs (Product Requirements Documents), User Stories, and Sprint Plans based on a simple project description.
+2. **Universal Authentication** — Secure Email/Password and Google OAuth powered by Better-Auth. JWT session tokens are securely stored in `SameSite=None` `httpOnly` cookies.
+3. **Server-Side Proxy Architecture** — Eliminates aggressive third-party cookie blocking for OAuth redirects by proxying frontend `/api/auth` requests directly to the backend through Next.js rewrites.
+4. **Project Management Workflow** — Full CRUD functionality to manage product ideas. Users can toggle project visibility (public vs private) and organize their workspaces efficiently.
+5. **Interactive AI Workspace** — Features a dedicated AI chat interface allowing users to brainstorm features, refine requirements, and chat with an AI "co-founder".
+6. **Comprehensive Document Hub** — Centralized management of all generated Project Documents, Features, Roadmaps, and Sprint Plans with capabilities to edit and delete.
+7. **Dashboard & Analytics** — A beautiful visual dashboard utilizing Recharts to display real-time statistics like active projects, generated AI docs, and a chronological timeline of recent activity logs.
+8. **Public Explore Page** — A robust discovery page featuring full-text search, category filters, visibility toggles, and pagination, allowing users to browse public projects created by the community.
+9. **Activity Logging System** — Automatically tracks and records critical user actions in the database to maintain an audit trail visible directly on the user's dashboard.
+10. **State Management & Caching** — Utilizes Zustand for lightweight global state (auth, UI) alongside TanStack Query v5 for efficient server-state caching, automatic refetching, and optimistic UI updates.
+11. **Responsive Glassmorphism UI** — Modern interface built with Tailwind CSS v4, featuring Framer Motion micro-animations, Swiper carousels, and a mobile-first responsive dashboard sidebar.
+12. **Full-Stack Type Safety** — End-to-end TypeScript integration with Zod schemas strictly validating all API payloads, request queries, and frontend form inputs.
 
 ---
 
@@ -47,10 +60,10 @@
 | TanStack Query   | v5       | Server state management          |
 | Zustand          | v5       | Client state (auth, ui state)    |
 | Axios            | v1       | HTTP client with interceptors    |
+| React Hook Form  | v7       | Form management                  |
 | Better-Auth      | latest   | Auth client                      |
 | Framer Motion    | v11      | Animations                       |
 | Recharts         | v2       | Dashboard charts                 |
-| Sonner           | v1       | Toast notifications              |
 
 ### Backend
 | Tech        | Version | Purpose                     |
@@ -61,6 +74,7 @@
 | MongoDB     | Atlas   | Database                    |
 | Mongoose    | v8      | ODM (schema & models)       |
 | Better-Auth | latest  | JWT auth & session handling |
+| Groq API    | latest  | High-speed LLM inference    |
 | Zod         | v3      | Request validation          |
 | cors        | v2      | Cross-origin requests       |
 | dotenv      | v17     | Environment variables       |
@@ -81,8 +95,8 @@ ProductPilot/
 │
 └── Server/                     # Express 5 backend
     ├── src/
-    │   ├── models/             # Mongoose schemas (Project, ActivityLog, etc.)
-    │   ├── controllers/        # Route controllers
+    │   ├── models/             # Mongoose schemas (Project, AIConversation, UserStory, etc.)
+    │   ├── controllers/        # Route controllers (ai.controller, project.controller, etc.)
     │   ├── middleware/         # Auth header extraction & Error handling
     │   ├── routes/             # API routes
     │   ├── auth.ts             # Initialize Better-Auth with dynamic imports
@@ -98,7 +112,8 @@ ProductPilot/
 ### Prerequisites
 - Node.js 20+
 - MongoDB Atlas account (or local MongoDB)
-- Google OAuth credentials
+- Google OAuth credentials (optional, for Google Login)
+- Groq API Key (required for AI generation features)
 
 ### 1. Clone Repositories
 
@@ -121,13 +136,21 @@ cd ProductPilot-Server
 npm install
 ```
 
-Create `.env`:
+Create `.env` in the Server directory:
 ```env
 PORT=8000
-MONGODB_URI=mongodb+srv://<user>:<pass>@cluster0.mongodb.net/productpilot
-JWT_SECRET=super_secret_jwt_key_at_least_32_chars
+MONGODB_URI=mongodb+srv://<user>:<pass>@cluster.mongodb.net/productpilot
+JWT_SECRET=your_super_secret_jwt_key_min_32_chars
 CLIENT_URL=http://localhost:3000
-BETTER_AUTH_URL=http://localhost:3000/api/auth
+
+# Better Auth Configuration
+BETTER_AUTH_SECRET=your_super_secret_jwt_key_min_32_chars
+BETTER_AUTH_URL=http://localhost:8000
+
+# AI Configuration
+GROQ_API_KEY=your_groq_api_key_here
+
+# Google OAuth Credentials
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
 ```
@@ -143,11 +166,12 @@ cd ProductPilot
 npm install
 ```
 
-Create `.env.local`:
+Create `.env.local` in the client directory:
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8000/api
-NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id
 ```
+
+*(Note: During local development, the Next.js frontend automatically proxies requests from `http://localhost:3000/api/*` to `http://localhost:8000/api/*`)*
 
 ```bash
 npm run dev    # starts on http://localhost:3000
@@ -155,13 +179,26 @@ npm run dev    # starts on http://localhost:3000
 
 ---
 
+## 🎭 User Permissions & Access
+
+| Feature                  | Guest (Unauthenticated) | Logged-in User |
+|--------------------------|:-----------------------:|:--------------:|
+| Browse Public Projects   | ✅                      | ✅             |
+| View Public Documents    | ✅                      | ✅             |
+| Create New Projects      | —                       | ✅             |
+| Access AI Workspace      | —                       | ✅             |
+| Generate AI Documents    | —                       | ✅             |
+| Edit / Delete Projects   | —                       | ✅ (Own only)  |
+
+---
+
 ## 🌍 Deployment
 
-| Component | Platform | Configuration |
-|-----------|----------|---------------|
-| **Frontend** | Vercel | Auto-detects `next.config.ts`. Includes proxy rewrites to bypass CORS. |
-| **Backend**  | Vercel | Serverless Functions via `/api/*`. |
-| **Database** | MongoDB | Atlas Cloud |
+| Service  | Platform        | Details |
+|----------|-----------------|---------|
+| Frontend | Vercel          | Utilizes `next.config.ts` rewrites to proxy `/api` requests to the backend to bypass strict CORS & cookie blocking. |
+| Backend  | Vercel          | Deployed as serverless functions. Database connection string and keys are managed in Vercel Environment Variables. |
+| Database | MongoDB Atlas   | Cloud-hosted NoSQL database. |
 
 ---
 
