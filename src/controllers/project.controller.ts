@@ -4,6 +4,7 @@ import { ProjectFeature } from '../models/ProjectFeature';
 import { UserStory } from '../models/UserStory';
 import { SprintPlan } from '../models/SprintPlan';
 import { Roadmap } from '../models/Roadmap';
+import { ProjectDocument } from '../models/ProjectDocument';
 
 export const getProjects = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -226,6 +227,43 @@ export const getPublicProjectById = async (req: Request, res: Response, next: Ne
       return res.status(404).json({ success: false, message: 'Public project not found' });
     }
     res.status(200).json({ success: true, data: project });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const saveDocument = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { title, type, content } = req.body;
+    
+    // Check project ownership
+    const project = await Project.findOne({ _id: req.params.id, ownerId: req.user?.id });
+    if (!project) {
+      return res.status(404).json({ success: false, message: 'Project not found' });
+    }
+
+    const doc = await ProjectDocument.create({
+      projectId: project._id,
+      title,
+      type,
+      content
+    });
+
+    res.status(201).json({ success: true, data: doc });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getDocuments = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const project = await Project.findOne({ _id: req.params.id, ownerId: req.user?.id });
+    if (!project) {
+      return res.status(404).json({ success: false, message: 'Project not found' });
+    }
+
+    const docs = await ProjectDocument.find({ projectId: project._id }).sort('-createdAt');
+    res.status(200).json({ success: true, data: docs });
   } catch (error) {
     next(error);
   }
